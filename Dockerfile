@@ -1,9 +1,3 @@
-FROM caddy:2.8.4-builder AS builder-caddy
-
-RUN xcaddy build \
-  --with github.com/caddy-dns/cloudflare@d11ac0bfeab7475d8b89e2dc93f8c7a8b8859b8f
-  
-
 FROM alpine AS builder-alist
 
 WORKDIR /app/
@@ -20,9 +14,6 @@ COPY ./content /workdir/
 
 ARG TARGETPLATFORM
 
-ENV CADDY_DOMAIN=http://localhost
-ENV CADDY_EMAIL=internal
-ENV CADDY_WEB_PORT=8080
 ENV ALIST_PORT=61600
 ENV ARIA2_PORT=61601
 ENV QBT_WEBUI_PORT=61602
@@ -39,7 +30,6 @@ RUN apk add --no-cache --update curl runit tzdata \
     && chmod +x /workdir/service/*/run /workdir/service/*/log/run \
     && ln -s /workdir/service/* /etc/service/
 
-COPY --from=builder-caddy /usr/bin/caddy /usr/bin/caddy
 COPY --from=builder-alist /app/bin/alist /usr/bin/
 
 ENTRYPOINT ["runsvdir","/etc/service"]
